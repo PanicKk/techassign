@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using WMS.Models.Entities;
 using WMS.Models.Orders.v1.Commands.CreateOrder;
+using WMS.Models.Orders.v1.Commands.UpdateOrder;
 using WMS.Models.Orders.v1.Queries.GetOrders;
 using WMS.Models.Orders.v1.Shared;
 

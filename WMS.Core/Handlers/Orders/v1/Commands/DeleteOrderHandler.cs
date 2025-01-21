@@ -4,8 +4,10 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using WMS.Core.Exceptions;
 using WMS.Core.Repositories;
+using WMS.Core.Services.IServices;
 using WMS.Models.Entities;
 using WMS.Models.Enums;
+using WMS.Models.Events;
 using WMS.Models.Orders.v1.Commands.DeleteOrder;
 using WMS.Models.Orders.v1.Shared;
 
@@ -16,11 +18,13 @@ public class DeleteOrderHandler : IRequestHandler<DeleteOrderCommand, DeleteOrde
     private readonly ILogger<DeleteOrderHandler> _logger;
     private readonly IMapper _mapper;
     private readonly IRepository<Order> _orderRepository;
+    private readonly IPublisherService _publisherService;
 
-    public DeleteOrderHandler(IMapper mapper, IRepository<Order> orderRepository)
+    public DeleteOrderHandler(IMapper mapper, IRepository<Order> orderRepository, IPublisherService publisherService)
     {
         _mapper = mapper;
         _orderRepository = orderRepository;
+        _publisherService = publisherService;
     }
 
     public async Task<DeleteOrderResponse> Handle(DeleteOrderCommand request, CancellationToken cancellationToken)
@@ -35,11 +39,15 @@ public class DeleteOrderHandler : IRequestHandler<DeleteOrderCommand, DeleteOrde
 
             await _orderRepository.DeleteAsync(order);
 
-            return new DeleteOrderResponse
+            var deleteOrderResponse = new DeleteOrderResponse
             {
                 Deleted = true,
                 Order = _mapper.Map<OrderModel>(order)
             };
+            
+            PublishOrderDeletedEvent(deleteOrderResponse);
+
+            return deleteOrderResponse;
         }
         catch (Exception ex)
         {
@@ -51,4 +59,14 @@ public class DeleteOrderHandler : IRequestHandler<DeleteOrderCommand, DeleteOrde
             throw new WMSException("Failed to Delete Order!", ExceptionType.NotDeleted, HttpStatusCode.InternalServerError);
         }
     }
+    private void PublishOrderDeletedEvent(DeleteOrderResponse deleteOrderResponse)
+    {
+        var orderCreatedEvent = new OrderDeletedEvent<DeleteOrderResponse>
+        {
+            Data = deleteOrderResponse
+        };
+        
+        _publisherService.PublishToQueue(orderCreatedEvent);
+    }
+    
 }

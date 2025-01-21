@@ -1,10 +1,13 @@
 ﻿using System.Net;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using WMS.Core.Exceptions;
 using WMS.Core.Repositories;
 using WMS.Core.Services.IServices;
+using WMS.Core.SingalR;
+using WMS.Core.SingalR.Abstractions;
 using WMS.Models.Entities;
 using WMS.Models.Enums;
 using WMS.Models.Events;
@@ -20,12 +23,17 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderModel
     private readonly IRepository<Order> _orderRepository;
     private readonly IPublisherService _publisherService;
 
-    public CreateOrderHandler(ILogger<CreateOrderHandler> logger, IMapper mapper, IRepository<Order> orderRepository, IPublisherService publisherService)
+    private readonly IHubContext<OrderNotificationHub, IOrderNotificationHub> _orderNotificationHub;
+
+    public CreateOrderHandler(ILogger<CreateOrderHandler> logger, IMapper mapper, IRepository<Order> orderRepository,
+        IPublisherService publisherService,
+        IHubContext<OrderNotificationHub, IOrderNotificationHub> orderNotificationHub)
     {
         _logger = logger;
         _mapper = mapper;
         _orderRepository = orderRepository;
         _publisherService = publisherService;
+        _orderNotificationHub = orderNotificationHub;
     }
 
     public async Task<OrderModel> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -41,6 +49,8 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderModel
 
             var createdOrder = _mapper.Map<OrderModel>(order);
 
+            await _orderNotificationHub.Clients.Group("OrderNotification").GetOrderNotification("A new order has been created!");
+
             PublishOrderCreatedEvent(createdOrder);
 
             return createdOrder;
@@ -49,10 +59,11 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderModel
         {
             if (ex is WMSException)
                 throw;
-            
+
             _logger.LogError(ex, "Failed to Create Order! Message: {Message}", ex.Message);
-            
-            throw new WMSException("Failed to Create Order!", ExceptionType.NotCreated, HttpStatusCode.InternalServerError);
+
+            throw new WMSException("Failed to Create Order!", ExceptionType.NotCreated,
+                HttpStatusCode.InternalServerError);
         }
     }
 
@@ -62,7 +73,7 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderModel
         {
             Data = createdOrder
         };
-        
+
         _publisherService.PublishToQueue(orderCreatedEvent);
     }
 }

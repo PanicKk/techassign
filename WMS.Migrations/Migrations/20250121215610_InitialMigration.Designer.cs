@@ -13,7 +13,7 @@ using WMS.Core.Data;
 namespace WMS.Migrations.Migrations
 {
     [DbContext(typeof(WMSDbContext))]
-    [Migration("20250121195503_InitialMigration")]
+    [Migration("20250121215610_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />

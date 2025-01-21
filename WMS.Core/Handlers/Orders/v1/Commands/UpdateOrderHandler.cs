@@ -45,6 +45,7 @@ public class UpdateOrderHandler : IRequestHandler<UpdateOrderCommand, UpdateOrde
 
             var updateOrderResponse = new UpdateOrderResponse
             {
+                Id = order.Id,
                 Items = _mapper.Map<List<OrderItemModel>>(order.Items),
                 OrderUpdated = true,
                 TotalAmount = order.Items.Sum(orderItem => orderItem.Price * orderItem.Quantity),

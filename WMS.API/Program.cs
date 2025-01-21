@@ -6,6 +6,7 @@ using WMS.Api.Extensions.DependencyInjection;
 using WMS.Api.Middlewares;
 using WMS.Core.Data;
 using WMS.Core.Repositories;
+using WMS.Core.SingalR;
 using WMS.MessageBroker.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +55,8 @@ services.RegisterServices();
 services.AddHttpClient();
 services.AddHttpContextAccessor();
 
+services.AddSignalR();
+
 services.AddCors(options =>
 {
     // var origins = builder.Configuration.GetSection("CorsOrigins").GetSection("AllowedOrigins").Get<string[]>();
@@ -79,6 +82,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.MapHub<OrderNotificationHub>("orderNotificationHub");
 
 app.UseHttpsRedirection();
 app.UseRouting();
