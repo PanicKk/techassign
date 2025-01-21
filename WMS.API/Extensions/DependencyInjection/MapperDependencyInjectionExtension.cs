@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.EquivalencyExpression;
+using WMS.Api.Controllers.v1;
 using WMS.Core.Mappings;
 
 namespace WMS.Api.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ public static class MapperDependencyInjectionExtension
         {
             cfg.AddProfile<OrderMappings>();
             cfg.AddProfile<WebhookMappings>();
+            cfg.AddProfile<ActivityLogMappings>();
             cfg.AddCollectionMappers();
         });
 

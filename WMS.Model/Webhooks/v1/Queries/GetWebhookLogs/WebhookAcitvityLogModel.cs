@@ -9,5 +9,4 @@ public class WebhookAcitvityLogModel
     public DateTime RequestDateTime { get; set; }
     public string ResponseStatusCode { get; set; }
     public bool Delivered { get; set; }
-    public DateTime CreatedAt { get; set; }
 }

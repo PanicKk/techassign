@@ -18,6 +18,6 @@ public class WebhookMappings : Profile
         
         CreateMap<Webhook, WebhookModel>().ReverseMap();
         
-        // CreateMap<Webhook, WebhookListModel>().ReverseMap();
+        CreateMap<Webhook, WebhookListModel>().ReverseMap();
     }
 }

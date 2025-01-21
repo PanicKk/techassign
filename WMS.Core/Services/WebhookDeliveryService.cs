@@ -35,7 +35,14 @@ public class WebhookDeliveryService : IWebhookDeliveryService
                                             webhook.EventTypes.Contains(eventType)));
 
         foreach (var webhook in webhooks)
-            await DeliverWebhookAsync(webhook, entityType, eventType, payload);
+            try
+            {
+                await DeliverWebhookAsync(webhook, entityType, eventType, payload);
+            }
+            catch (Exception)
+            {
+                continue;
+            }
     }
 
     private async Task DeliverWebhookAsync(Webhook webhook, EntityType entityType, EventType eventType, object payload)
@@ -59,9 +66,13 @@ public class WebhookDeliveryService : IWebhookDeliveryService
             var response = await _httpClient.SendAsync(request);
             await SaveActivityLog(webhook, entityType, eventType, response);
         }
-        catch (Exception e)
+        catch (HttpRequestException ex)
         {
-            Console.WriteLine(e);
+            await SaveActivityLog(webhook, entityType, eventType, new HttpResponseMessage
+            {
+                StatusCode = ex.StatusCode ?? HttpStatusCode.NotFound,
+                ReasonPhrase = ex.Message
+            });
             throw;
         }
     }

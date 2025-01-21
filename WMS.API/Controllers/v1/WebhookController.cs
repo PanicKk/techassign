@@ -8,6 +8,7 @@ using WMS.Models.Webhooks.v1.Commands.CreateWebhook;
 using WMS.Models.Webhooks.v1.Commands.DeleteWebhook;
 using WMS.Models.Webhooks.v1.Commands.UpdateWebhook;
 using WMS.Models.Webhooks.v1.Queries.GetWebhook;
+using WMS.Models.Webhooks.v1.Queries.GetWebhookLogs;
 using WMS.Models.Webhooks.v1.Queries.GetWebhooks;
 using WMS.Models.Webhooks.v1.Shared;
 
@@ -63,6 +64,33 @@ public class WebhookController : BaseController
                                   PageSize = getWebhooksResult.PageSize,
                                   TotalCount = getWebhooksResult.TotalCount,
                                   TotalPages = getWebhooksResult.TotalPages
+                              }));
+    }
+    
+    [HttpGet]
+    [Route("{webhookId}/logs")]
+    public async Task<IActionResult> GetWebhookActivityLogsAsync(Guid webhookId,[FromQuery] GetWebhookLogsQuery request)
+    {
+        var response = new ResponseModel<IPagedList<WebhookAcitvityLogModel>>();
+
+        if (!ModelState.IsValid)
+        {
+            response.AddErrors(ModelState.GetErrorMessages());
+
+            return BadRequest(response.BadRequest());
+        }
+
+        request.WebhookId = webhookId;
+        
+        var getWebhooksActivityLogs = await Mediator.Send(request);
+
+        return Ok(response.Ok(getWebhooksActivityLogs,
+                              new PaginationResultInfo
+                              {
+                                  PageIndex = getWebhooksActivityLogs.PageIndex,
+                                  PageSize = getWebhooksActivityLogs.PageSize,
+                                  TotalCount = getWebhooksActivityLogs.TotalCount,
+                                  TotalPages = getWebhooksActivityLogs.TotalPages
                               }));
     }
 

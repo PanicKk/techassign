@@ -26,9 +26,9 @@ namespace WMS.Migrations.Migrations
                     request_date_time = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     response_status_code = table.Column<string>(type: "text", nullable: true),
                     delivered = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    is_deleted = table.Column<bool>(type: "boolean", nullable: false)
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "timezone('UTC', now())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false, defaultValueSql: "timezone('UTC', now())"),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
