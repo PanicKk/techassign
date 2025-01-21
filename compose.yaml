@@ -1,0 +1,12 @@
+﻿services:
+  wms.api:
+    image: wms.api
+    build:
+      context: .
+      dockerfile: WMS.API/Dockerfile
+
+  wms.api-1:
+    image: wms.api-1
+    build:
+      context: .
+      dockerfile: WMS.Api/Dockerfile
